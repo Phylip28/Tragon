@@ -49,7 +49,29 @@ Before ending a session:
 
 - **Trigger:** Create a local Git commit immediately after a single file or specific feature passes all verification loops.
 - **Isolation:** Stage files selectively using `git add <file_path>`. Never use `git add .` unless all changes belong to the same atomic feature.
-- **Format:** Use lowercase conventional commits. Examples: `feat(backend): add clash royale api player endpoint`, `fix(frontend): resolve loss battle`.
+- **Format:** Use lowercase conventional commits. Examples: `feat(backend): add restaurant model`, `fix(frontend): resolve cart state`.
+
+### Branch Convention
+
+Every task or group of related tasks lives on its own branch. Branch names follow this format:
+
+```
+feat/TRA-<NN>/<short-description>
+fix/TRA-<NN>/<short-description>
+test/TRA-<NN>/<short-description>
+```
+
+Where `<NN>` is the zero-padded task number from `tasks.md` (e.g. `01`, `02`, `07`). Use the prefix that matches the nature of the work:
+- `feat/` — new functionality
+- `fix/` — bug fix or correction
+- `test/` — property tests or test-only tasks
+
+**Rules:**
+- Create the branch before writing any code for that task: `git checkout -b feat/TRA-01/backend-setup`.
+- One branch per top-level task (e.g. task 1, task 2, task 4). Sub-tasks (2.1, 2.2, ...) all live on the same branch as their parent.
+- Merge to `main` only after the task's verification loop passes (tests green, no lint errors).
+- Delete the branch locally after merging: `git branch -d feat/TRA-01/backend-setup`.
+- Never push directly to `main`.
 
 ## Output Optimization
 
