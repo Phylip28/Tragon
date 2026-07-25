@@ -1,4 +1,13 @@
-# CONSTRAINTS.md
+# Constraints
+
+## Ownership
+
+- This file MUST NOT be modified by any agent. Only a human may edit it.
+- Agents MUST only read this file and MAY suggest changes when explicitly asked by the user.
+
+## Git
+
+- Agents MUST NOT execute `git push` under any circumstances. Only a human may push to remote.
 
 ## Language
 
