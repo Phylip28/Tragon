@@ -6,7 +6,7 @@ The goal is to leave the repo in a state where the next session can continue wit
 ## Project Overview
 
 Tragón — Platform that automates order taking for restaurants.
-Django 5.2.x + PostgreSQL + Astro 5.x + Django Channels + Redis + S3 + Docker.
+Django 5.2.x + PostgreSQL + Astro 7.x + Django Channels + Redis + S3 + Docker.
 
 Authentication: JWT (Simple JWT) for restaurant owners. No auth for clients placing orders.
 Formatting: ruff (Python).

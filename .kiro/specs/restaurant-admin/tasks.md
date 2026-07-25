@@ -188,8 +188,9 @@ Foundational module for Tragón. Sets up Django backend (accounts, restaurants, 
     - **Validates: Requirements 6.1, 6.2**
 
 - [ ] 11. Frontend project setup
-  - [ ] 11.1 Initialize Astro 5.x project with React integration
-    - Create `tragon_frontend/` with `package.json` (pinned: astro, @astrojs/react, react, react-dom, nanostores, @nanostores/react, tailwindcss)
+  - [ ] 11.1 Initialize Astro 7.x project with `pnpm create astro@latest`
+    - Create `tragon_frontend/` with `pnpm create astro@latest` (pinned: astro@7.1.3, @astrojs/react, react, react-dom, nanostores, @nanostores/react, tailwindcss)
+    - Use `pnpm` as the package manager
     - Configure `astro.config.mjs` with React integration and SSR adapter
     - Set up Tailwind CSS
     - _Requirements: 1.1, 1.3, 3.2_
@@ -235,12 +236,12 @@ Foundational module for Tragón. Sets up Django backend (accounts, restaurants, 
     - _Requirements: 2.2, 2.3, 3.1_
 
 - [ ] 14. Checkpoint — Verify frontend builds
-  - Ensure `npm run build` succeeds in `tragon_frontend/`, ask the user if questions arise.
+  - Ensure `pnpm build` succeeds in `tragon_frontend/`, ask the user if questions arise.
 
 - [ ] 15. Docker infrastructure
   - [ ] 15.1 Create Docker and docker-compose setup
     - `tragon_backend/Dockerfile` — Python 3.12, uv install, Django app
-    - `tragon_frontend/Dockerfile` — Node 20, Astro build
+    - `tragon_frontend/Dockerfile` — Node 20, pnpm, Astro build
     - `docker-compose.yml` at repo root — services: backend, frontend, postgres (with volume), localstack (S3 emulation for dev)
     - Environment variables for DB connection, JWT secret, S3 config, CORS origins
     - _Requirements: 1.4, 2.1, 4.4, 6.1_

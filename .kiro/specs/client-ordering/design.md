@@ -10,7 +10,7 @@ The client-ordering module provides the public-facing customer experience: brows
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Astro 5.x SSR Page: /[slug]/                              │
+│  Astro 7.x SSR Page: /[slug]/                              │
 │  - MenuPage (categories, products)                          │
 │  - ProductDetail modal (toppings, instructions)             │
 │  - OrderBar (item count, cancel, pay)                       │

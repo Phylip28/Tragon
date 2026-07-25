@@ -10,7 +10,7 @@ The restaurant-admin module provides the backend API and frontend management pan
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Astro 5.x SSR + React Islands (Management Panel)          │
+│  Astro 7.x SSR + React Islands (Management Panel)          │
 │  - Registration / Login pages                               │
 │  - Restaurant config & white-label settings                 │
 │  - Menu management (categories, products, toppings)         │
@@ -70,7 +70,7 @@ tragon_backend/
 └── manage.py
 ```
 
-### Frontend Structure (Astro 5.x)
+### Frontend Structure (Astro 7.x)
 
 ```
 tragon_frontend/

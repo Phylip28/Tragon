@@ -12,7 +12,7 @@ Depends on: restaurant-admin (Order model, state machine, JWT auth) and client-o
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Astro 5.x SSR + React Island (Kitchen Panel)              │
+│  Astro 7.x SSR + React Island (Kitchen Panel)              │
 │  /kitchen/[slug]/ → KitchenPanel.tsx                        │
 │  - OrderCard.tsx (color-coded by status)                    │
 │  - FilterBar.tsx (status + delivery type)                   │
