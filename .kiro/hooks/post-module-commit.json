@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto-commit on task completion",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "command",
+        "command": "cd /home/diego/python/kiro/Tragon && git add -A && git commit -m \"feat: complete task $(date +%s)\" --allow-empty"
+      }
+    }
+  ]
+}

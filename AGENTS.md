@@ -5,8 +5,11 @@ The goal is to leave the repo in a state where the next session can continue wit
 
 ## Project Overview
 
-Tragón — AI assistant that automates order taking and inventory updates for restaurants.
-Python 3.12 + Bedrock + Dynamo DB + API Gateway + S3 + Docker.
+Tragón — Platform that automates order taking for restaurants.
+Django 5.2.x + PostgreSQL + Astro 7.x + Django Channels + Redis + S3 + Docker.
+
+Authentication: JWT (Simple JWT) for restaurant owners. No auth for clients placing orders.
+Formatting: ruff (Python).
 
 ## Startup Workflow
 

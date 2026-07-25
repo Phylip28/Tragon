@@ -1,4 +1,4 @@
-# Requirements Document
+# Requirements Document — Restaurant Admin
 
 ## Introduction
 
@@ -13,9 +13,23 @@ The restaurant-admin module provides restaurant owners with tools to configure t
 
 ## Requirements
 
-### Requirement 1: Restaurant Profile Configuration
+### Requirement 1: Restaurant Registration and Login
 
-**User Story:** As a restaurant owner, I want to configure my restaurant's profile (name, logo, address, payment key, delivery fee), so that clients see accurate information and can pay correctly.
+**User Story:** As a restaurant owner, I want to register and log in from the frontend, so that I can manage my restaurant without needing Django Admin access.
+
+#### Acceptance Criteria
+
+1. THE frontend SHALL provide a registration form with fields: owner name, email, password, and restaurant name.
+2. WHEN the owner submits the registration form, THE backend SHALL create the owner account and the restaurant record, and SHALL auto-generate a unique slug based on the restaurant name.
+3. THE frontend SHALL provide a login form with email and password fields.
+4. WHEN the owner logs in successfully, THE backend SHALL return a JWT access token and a refresh token using Simple JWT.
+5. THE frontend SHALL store the JWT tokens securely and use the access token for all authenticated API requests.
+6. WHEN the access token expires, THE frontend SHALL automatically request a new one using the refresh token without requiring re-login.
+7. IF the refresh token is also expired, THEN THE frontend SHALL redirect the owner to the login page.
+
+### Requirement 2: Restaurant Profile Configuration
+
+**User Story:** As a restaurant owner, I want to configure my restaurant's profile, so that clients see accurate information.
 
 #### Acceptance Criteria
 
@@ -35,7 +49,7 @@ The restaurant-admin module provides restaurant owners with tools to configure t
 
 ### Requirement 3: Image Configuration
 
-**User Story:** As a restaurant owner, I want to upload and configure images for my restaurant logo and products, so that clients see appealing visuals.
+**User Story:** As a restaurant owner, I want to view and manage orders from the frontend panel, so that I can track and process customer orders.
 
 #### Acceptance Criteria
 

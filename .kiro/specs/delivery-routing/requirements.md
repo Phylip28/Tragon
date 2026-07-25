@@ -1,14 +1,14 @@
-# Requirements Document
+# Requirements Document — Delivery Routing
 
 ## Introduction
 
-The delivery-routing module provides delivery drivers with a map interface that includes route autocomplete, allowing them to efficiently navigate to delivery addresses. It depends on the client-ordering module being functional (orders with delivery addresses must exist).
+The delivery-routing module provides delivery drivers with a map interface that includes route autocomplete, allowing them to efficiently navigate to delivery addresses. Depends on client-ordering module (orders with delivery addresses must exist).
 
 ## Glossary
 
-- **Driver**: Delivery person responsible for transporting orders from the restaurant to the client's address.
-- **Route**: Navigation path from the restaurant to the delivery address.
-- **Autocomplete**: Feature that suggests complete addresses or route steps as the driver types.
+- **Driver**: Delivery person responsible for transporting orders.
+- **Route**: Navigation path from restaurant to delivery address.
+- **Autocomplete**: Feature that suggests addresses as the driver types.
 
 ## Requirements
 
