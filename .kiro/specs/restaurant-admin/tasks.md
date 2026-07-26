@@ -18,7 +18,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: `docker-compose up` boots without errors, Django admin accessible
   - _Requirements: —_
 
-- [ ] 2. Database models and migrations
+- [x] 2. Database models and migrations
   - [x] 2.1 Implement `Owner` model in `apps/restaurants/models.py`
     - Extend `AbstractUser`, email as `USERNAME_FIELD`, timestamps
   - [x] 2.2 Implement `Restaurant` model
@@ -34,7 +34,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - [x] 2.7 Implement `Order`, `OrderItem`, `OrderItemTopping` models in `apps/orders/models.py`
     - All fields and constraints per `DATABASE.md`, including CHECK constraints on status and delivery_type
     - These are read-only in this module (used for order history)
-  - [ ] 2.8 Generate and run all migrations
+  - [x] 2.8 Generate and run all migrations
   - Verify: `python manage.py migrate` runs cleanly, all tables exist in postgres
   - _Requirements: R1, R2, R4_
 
@@ -109,7 +109,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: filters return correct subset; detail shows full item breakdown
   - _Requirements: R4.1, R4.2, R4.3_
 
-- [ ] 11. Frontend project setup
+- [x] 11. Frontend project setup
   - Create `tragon_frontend/` with Astro 7.x, React integration, TailwindCSS
   - Configure SSR adapter, `astro.config.mjs`
   - Install: nanostores, @nanostores/react
