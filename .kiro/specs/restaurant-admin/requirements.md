@@ -15,7 +15,20 @@ The restaurant-admin module provides restaurant owners with tools to configure t
 
 ### Requirement 1: Restaurant Profile Configuration
 
-**User Story:** As a restaurant owner, I want to configure my restaurant's profile (name, logo, address, payment key, delivery fee), so that clients see accurate information and can pay correctly.
+**User Story:** As a restaurant owner, I want to register and log in from the frontend, so that I can manage my restaurant without needing backend admin access.
+
+#### Acceptance Criteria
+
+1. THE system SHALL provide a registration form with fields: owner name, email, password, and restaurant name.
+2. WHEN the owner submits the registration form, THE system SHALL create the owner account and the restaurant record, and SHALL auto-generate a unique slug based on the restaurant name.
+3. THE system SHALL provide a login form with email and password fields.
+4. WHEN the owner logs in successfully, THE system SHALL authenticate the session and grant access to the management panel.
+5. WHILE the owner's session is active, THE system SHALL maintain authentication and automatically renew it without requiring re-login.
+6. IF the session has fully expired, THEN THE system SHALL redirect the owner to the login page.
+
+### Requirement 2: Restaurant Profile Configuration
+
+**User Story:** As a restaurant owner, I want to configure my restaurant's profile, so that clients see accurate information.
 
 #### Acceptance Criteria
 
