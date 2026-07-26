@@ -95,14 +95,14 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: topping belongs to correct product; deleting product cascades to toppings
   - _Requirements: R2.3_
 
-- [ ] 9. Public menu endpoint
+- [x] 9. Public menu endpoint
   - `GET /api/v1/catalog/{slug}/menu/` — no auth required
   - Returns: restaurant basic info + categories (only `is_active=true`) → products (only `is_active=true`) with label → toppings (only `is_active=true`)
   - Products with `category_id IS NULL` appended at the end as an unlabeled group
   - Verify: inactive categories/products/toppings excluded; uncategorized products appear at end; highlight labels included
   - _Requirements: R3.3, R5.3, R5.4_
 
-- [ ] 10. Order history API
+- [x] 10. Order history API
   - `GET /api/v1/orders/` — list orders for the restaurant (via mixin), with filters: `status`, `date_from`, `date_to`
   - `GET /api/v1/orders/{id}/` — order detail including items, toppings, notes
   - Response includes: reference_number, created_at, items summary, total, delivery_type, payment method type, status
@@ -127,14 +127,14 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: full register → login → token refresh cycle
   - _Requirements: R1.3_
 
-- [ ] 13. Frontend: restaurant profile panel
+- [x] 13. Frontend: restaurant profile panel
   - `src/pages/admin/settings.astro` + `SettingsForm.tsx` React island
   - Edit: name, address, delivery_fee, logo upload
   - Payment methods CRUD section (list, add, edit, remove)
   - Verify: save profile → changes reflected; upload logo → image displayed
   - _Requirements: R1.2, R3.1_
 
-- [ ] 14. Frontend: menu management panel
+- [x] 14. Frontend: menu management panel
   - `src/pages/admin/menu.astro` + `MenuManager.tsx` React island
   - Category CRUD (create, rename, soft-delete)
   - Product CRUD per category (create, edit, soft-delete, photo upload)
@@ -143,7 +143,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: full CRUD cycle for categories/products/toppings; labels display correctly
   - _Requirements: R2.1, R2.2, R2.3, R3.2, R5.1, R5.2_
 
-- [ ] 15. Frontend: order history panel
+- [x] 15. Frontend: order history panel
   - `src/pages/admin/orders.astro` + `OrderList.tsx` React island
   - List view with filters: status, date range
   - Detail view: items, toppings, notes, total, delivery type, payment method

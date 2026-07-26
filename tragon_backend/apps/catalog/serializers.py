@@ -2,6 +2,8 @@
 
 from rest_framework import serializers
 
+from apps.restaurants.models import Restaurant
+
 from .models import Category, Product, Topping
 
 
@@ -72,3 +74,62 @@ class ToppingSerializer(serializers.ModelSerializer):
         model = Topping
         fields = ["id", "product", "name", "extra_price", "is_active"]
         read_only_fields = ["id", "product", "is_active"]
+
+
+# --- Public menu serializers (no auth) ---
+
+
+class PublicToppingSerializer(serializers.ModelSerializer):
+    """Topping data for the public menu."""
+
+    class Meta:
+        model = Topping
+        fields = ["id", "name", "extra_price"]
+
+
+class PublicProductSerializer(serializers.ModelSerializer):
+    """Product data for the public menu, including active toppings."""
+
+    toppings = PublicToppingSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name",
+            "description",
+            "photo_url",
+            "base_price",
+            "label",
+            "toppings",
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Only include active toppings
+        data["toppings"] = PublicToppingSerializer(
+            instance.toppings.filter(is_active=True), many=True
+        ).data
+        return data
+
+
+class PublicCategorySerializer(serializers.ModelSerializer):
+    """Category with its active products for the public menu."""
+
+    products = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ["id", "name", "products"]
+
+    def get_products(self, obj):
+        active_products = obj.products.filter(is_active=True)
+        return PublicProductSerializer(active_products, many=True).data
+
+
+class PublicRestaurantSerializer(serializers.ModelSerializer):
+    """Basic restaurant info for the public menu."""
+
+    class Meta:
+        model = Restaurant
+        fields = ["name", "slug", "logo_url", "address_line", "delivery_fee"]

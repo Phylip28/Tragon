@@ -1,9 +1,10 @@
-"""Views for the catalog app — categories, products, toppings."""
+"""Views for the catalog app -- categories, products, toppings."""
 
 import uuid
 
 import boto3
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (
@@ -12,10 +13,13 @@ from rest_framework.mixins import (
     UpdateModelMixin,
 )
 from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from apps.restaurants.mixins import RestaurantScopedMixin
+from apps.restaurants.models import Restaurant
 from apps.restaurants.permissions import IsRestaurantOwner
 
 from .models import Category, Product, Topping
@@ -23,6 +27,9 @@ from .serializers import (
     CategorySerializer,
     ProductLabelSerializer,
     ProductSerializer,
+    PublicCategorySerializer,
+    PublicProductSerializer,
+    PublicRestaurantSerializer,
     ToppingSerializer,
 )
 
@@ -113,7 +120,7 @@ class ProductViewSet(
             return Response(
                 {
                     "error": "validation_error",
-                    "message": "No se proporcionó un archivo de imagen.",
+                    "message": "No se proporcion\u00f3 un archivo de imagen.",
                     "details": {},
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -276,3 +283,46 @@ class ToppingDetailViewSet(
         instance.is_active = False
         instance.save(update_fields=["is_active"])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PublicMenuView(APIView):
+    """
+    Public menu endpoint -- no authentication required.
+
+    GET /api/v1/catalog/{slug}/menu/
+    Returns restaurant info, active categories with active products/toppings,
+    plus uncategorized products at the end.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request, slug):
+        restaurant = get_object_or_404(Restaurant, slug=slug, is_active=True)
+
+        # Active categories for this restaurant
+        categories = Category.objects.filter(restaurant=restaurant, is_active=True)
+
+        # Uncategorized products: category is NULL or belongs to an inactive
+        # category of this restaurant (soft-deleted categories keep the FK).
+        uncategorized_products = Product.objects.filter(
+            is_active=True,
+            category__restaurant=restaurant,
+            category__is_active=False,
+        ) | Product.objects.filter(
+            is_active=True,
+            category__isnull=True,
+        )
+
+        restaurant_data = PublicRestaurantSerializer(restaurant).data
+        categories_data = PublicCategorySerializer(categories, many=True).data
+        uncategorized_data = PublicProductSerializer(
+            uncategorized_products, many=True
+        ).data
+
+        return Response(
+            {
+                "restaurant": restaurant_data,
+                "categories": categories_data,
+                "uncategorized_products": uncategorized_data,
+            }
+        )

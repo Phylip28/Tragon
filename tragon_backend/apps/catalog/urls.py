@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CategoryViewSet,
     ProductViewSet,
+    PublicMenuView,
     ToppingDetailViewSet,
     ToppingListCreateViewSet,
 )
@@ -23,5 +24,10 @@ urlpatterns = [
         "products/<uuid:product_id>/toppings/",
         ToppingListCreateViewSet.as_view({"get": "list", "post": "create"}),
         name="product-toppings",
+    ),
+    path(
+        "<slug:slug>/menu/",
+        PublicMenuView.as_view(),
+        name="public-menu",
     ),
 ]

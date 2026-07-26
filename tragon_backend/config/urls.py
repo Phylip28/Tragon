@@ -9,6 +9,7 @@ api_v1_patterns = [
     path("auth/", include("apps.restaurants.urls")),
     path("restaurants/", include("apps.restaurants.profile_urls")),
     path("catalog/", include("apps.catalog.urls")),
+    path("orders/", include("apps.orders.urls")),
 ]
 
 urlpatterns = [

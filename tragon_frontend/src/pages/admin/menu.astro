@@ -1,0 +1,22 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import MenuManager from "@/components/MenuManager";
+---
+
+<BaseLayout title="Gestión de Menú">
+  <div class="min-h-screen bg-gray-50">
+    <header class="bg-white border-b border-gray-200 px-6 py-4">
+      <div class="flex items-center justify-between max-w-7xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-900">Gestión de Menú</h1>
+        <nav class="flex gap-4 text-sm">
+          <a href="/admin/menu" class="text-orange-600 font-medium">Menú</a>
+          <a href="/admin/settings" class="text-gray-600 hover:text-gray-900">Configuración</a>
+          <a href="/admin/orders" class="text-gray-600 hover:text-gray-900">Pedidos</a>
+        </nav>
+      </div>
+    </header>
+    <main class="max-w-7xl mx-auto p-6">
+      <MenuManager client:load />
+    </main>
+  </div>
+</BaseLayout>
