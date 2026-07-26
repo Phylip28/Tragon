@@ -13,7 +13,7 @@ The restaurant-admin module provides restaurant owners with tools to configure t
 
 ## Requirements
 
-### Requirement 1: Restaurant Registration and Login
+### Requirement 1: Restaurant Profile Configuration
 
 **User Story:** As a restaurant owner, I want to register and log in from the frontend, so that I can manage my restaurant without needing backend admin access.
 
@@ -48,7 +48,7 @@ The restaurant-admin module provides restaurant owners with tools to configure t
 
 ### Requirement 3: Image Configuration
 
-**User Story:** As a restaurant owner, I want to view and manage orders from the frontend panel, so that I can track and process customer orders.
+**User Story:** As a restaurant owner, I want to upload and configure images for my restaurant logo and products, so that clients see appealing visuals.
 
 #### Acceptance Criteria
 
