@@ -5,9 +5,9 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 ## Status
 
 - [x] Fields and relationships defined
-- [~] `NOT NULL` constraints (in progress, see tables below)
-- [~] `ON DELETE` behavior (in progress, see tables below)
-- [ ] Indexes
+- [x] `NOT NULL` constraints
+- [x] `ON DELETE` behavior
+- [x] Indexes
 - [x] Unique constraints defined for `payment_method` and `category`
 
 ## Decisions Log
@@ -42,6 +42,10 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 | 26  | `order` address fields (`address_line`, `latitude`, `longitude`) and `cash_denomination` remain nullable at the DB level                                   | The system supports dine-in/pickup orders (no address needed) and non-cash payments (no denomination needed). Making these `NOT NULL` would force irrelevant data entry. Conditional requirement (`address_line` required only when `delivery_type = 'delivery'`; `cash_denomination` required only when the referenced `payment_method.type = 'cash'`) is enforced at the application layer (serializer), not via DB constraint — the second case requires a cross-table check that a simple `CHECK` cannot express. |
 | 27  | `order_item.order_id` and `order_item_topping.order_item_id` use `ON DELETE RESTRICT`                                                                      | Orders must never be deleted (historical/operational record). `RESTRICT` is a defense-in-depth safeguard at the DB level, even though the application should never attempt to delete an order in the first place.                                                                                                                                                                                                                                                                                                     |
 | 28  | `topping.product_id` uses `ON DELETE CASCADE`                                                                                                              | Unlike category→product, a topping has no independent meaning without its product. Deleting the product deletes its toppings.                                                                                                                                                                                                                                                                                                                                                                                         |
+| 29  | Add `is_active` to `restaurant`                                                                                                                            | Restaurants are never hard-deleted, consistent with `category`/`product`/`topping`. A restaurant with historical orders must remain in the database indefinitely.                                                                                                                                                                                                                                                                                                                                                     |
+| 30  | `payment_method.restaurant_id`, `category.restaurant_id`, `order.restaurant_id` use `NOT NULL, ON DELETE RESTRICT`                                         | A restaurant should never be hard-deleted while it has dependent data. `RESTRICT` is a safeguard; soft-delete (`is_active = false`) is the actual deactivation path.                                                                                                                                                                                                                                                                                                                                                  |
+| 31  | `order_item.product_id` and `order_item_topping.topping_id` use `NOT NULL, ON DELETE RESTRICT`                                                             | A product or topping with order history must not be hard-deleted. Soft-delete (`is_active = false`) is the correct way to remove it from the active menu while preserving order history integrity.                                                                                                                                                                                                                                                                                                                    |
+| 32  | `product.category_id` remains the only nullable FK in the schema                                                                                           | All other foreign keys are `NOT NULL` — every row must reference a valid parent. Only `product.category_id` is nullable, per decision #21 (`SET NULL` on category deletion).                                                                                                                                                                                                                                                                                                                                          |
 
 ## Tables
 
@@ -50,14 +54,15 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 | Field            | Type               | Constraints | Description                        |
 | ---------------- | ------------------ | ----------- | ---------------------------------- |
 | id               | UUID PK            |             | Internal identifier                |
-| slug             | VARCHAR(50) UNIQUE |             | Immutable public identifier        |
-| name             | VARCHAR(200)       |             | Restaurant name                    |
+| slug             | VARCHAR(50) UNIQUE | NOT NULL    | Immutable public identifier        |
+| name             | VARCHAR(200)       | NOT NULL    | Restaurant name                    |
 | logo_url         | TEXT               |             | Logo URL in S3                     |
 | address_line     | TEXT               | NOT NULL    | Physical address                   |
 | latitude         | DECIMAL            |             | Restaurant location latitude       |
 | longitude        | DECIMAL            |             | Restaurant location longitude      |
 | telegram_chat_id | VARCHAR(100)       | NOT NULL    | Telegram chat ID for notifications |
 | delivery_fee     | INTEGER            | NOT NULL    | Delivery fee amount                |
+| is_active        | BOOLEAN            | NOT NULL    | Soft-delete flag                   |
 | created_at       | TIMESTAMPTZ        |             | Creation timestamp                 |
 
 ### `payment_method`
@@ -65,7 +70,7 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 | Field         | Type            | Constraints                                                  | Description                                                 |
 | ------------- | --------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
 | id            | UUID PK         |                                                              |                                                             |
-| restaurant_id | FK → restaurant |                                                              | Owning restaurant                                           |
+| restaurant_id | FK → restaurant | NOT NULL, ON DELETE RESTRICT                                 | Owning restaurant                                           |
 | type          | VARCHAR(30)     | NOT NULL, CHECK IN (`cash`, `transfer`, `transfer_with_key`) |                                                             |
 | key_value     | VARCHAR(200)    |                                                              | Required when `type = 'transfer_with_key'` (e.g. Bre-b key) |
 | is_active     | BOOLEAN         | NOT NULL                                                     |                                                             |
@@ -77,12 +82,12 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 
 ### `category`
 
-| Field         | Type            | Constraints | Description |
-| ------------- | --------------- | ----------- | ----------- |
-| id            | UUID PK         |             |             |
-| restaurant_id | FK → restaurant |             |             |
-| name          | VARCHAR(200)    | NOT NULL    |             |
-| is_active     | BOOLEAN         | NOT NULL    |             |
+| Field         | Type            | Constraints                  | Description |
+| ------------- | --------------- | ---------------------------- | ----------- |
+| id            | UUID PK         |                              |             |
+| restaurant_id | FK → restaurant | NOT NULL, ON DELETE RESTRICT |             |
+| name          | VARCHAR(200)    | NOT NULL                     |             |
+| is_active     | BOOLEAN         | NOT NULL                     |             |
 
 **Table constraint:** `UNIQUE(restaurant_id, name)` — scoped per restaurant, not global.
 
@@ -114,8 +119,8 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 | Field               | Type                | Constraints                                                                              | Description                               |
 | ------------------- | ------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------- |
 | id                  | UUID PK             |                                                                                          |                                           |
-| reference_number    | VARCHAR(20) UNIQUE  |                                                                                          | Human-readable reference number           |
-| restaurant_id       | FK → restaurant     | NOT NULL                                                                                 |                                           |
+| reference_number    | VARCHAR(20) UNIQUE  | NOT NULL                                                                                 | Human-readable reference number           |
+| restaurant_id       | FK → restaurant     | NOT NULL, ON DELETE RESTRICT                                                             |                                           |
 | delivery_type       | VARCHAR(30)         | NOT NULL, CHECK IN (`delivery`, `pickup`, `dine_in`)                                     |                                           |
 | address_line        | TEXT                |                                                                                          | Resolved delivery address (if delivery)   |
 | latitude            | DECIMAL             |                                                                                          | Delivery location latitude (if delivery)  |
@@ -136,7 +141,7 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 | ---------- | ------------ | ---------------------------- | ---------------------------------------------------- |
 | id         | UUID PK      |                              |                                                      |
 | order_id   | FK → order   | NOT NULL, ON DELETE RESTRICT | Orders are never deleted; RESTRICT as a safeguard    |
-| product_id | FK → product |                              |                                                      |
+| product_id | FK → product | NOT NULL, ON DELETE RESTRICT | A product with order history is never hard-deleted   |
 | notes      | TEXT         |                              | Special instructions for this item (e.g. "no onion") |
 | unit_price | INTEGER      | NOT NULL                     | Product price captured at order time                 |
 
@@ -146,15 +151,19 @@ Living document tracking the normalized PostgreSQL schema for Tragón. This is a
 | ------------- | --------------- | ---------------------------- | --------------------------------------------------------------- |
 | id            | UUID PK         |                              |                                                                 |
 | order_item_id | FK → order_item | NOT NULL, ON DELETE RESTRICT | Order items are never deleted directly; RESTRICT as a safeguard |
-| topping_id    | FK → topping    |                              |                                                                 |
+| topping_id    | FK → topping    | NOT NULL, ON DELETE RESTRICT | A topping with order history is never hard-deleted              |
 | extra_price   | INTEGER         | NOT NULL                     | Topping price captured at order time                            |
 
-## Open Items
+## Indexes
 
-- Remaining `NOT NULL` constraints for fields not yet covered above (e.g. `restaurant.slug`, `restaurant.name`, `order.reference_number`, all FK columns not already specified).
-- `ON DELETE` behavior for `category.restaurant_id` — likely soft-delete (`is_active`) for `restaurant` rather than hard delete.
-- Application-layer validation rules (not DB constraints) still to be documented in the relevant module's design:
-  - `order.address_line`/`latitude`/`longitude` required only when `delivery_type = 'delivery'`.
-  - `order.cash_denomination` required only when the referenced `payment_method.type = 'cash'`.
-- Public menu display rule: products with `category_id IS NULL` (uncategorized) are appended at the end of the menu (see decision #24) — needs to be reflected in the `client-ordering` design when built.
-- Indexes: `category(restaurant_id)`, `product(category_id)`, `order(restaurant_id, created_at)`, `order(status)`.
+| Table                | Index                         | Reason                                                                       |
+| -------------------- | ----------------------------- | ---------------------------------------------------------------------------- |
+| `category`           | `(restaurant_id)`             | List categories for a restaurant (menu management, public menu)              |
+| `product`            | `(category_id)`               | List products within a category                                              |
+| `payment_method`     | `(restaurant_id)`             | List payment methods for a restaurant                                        |
+| `order`              | `(restaurant_id, created_at)` | Order history list, sorted by most recent                                    |
+| `order`              | `(status)`                    | Filter orders by status (order history filters, kitchen-panel active orders) |
+| `order_item`         | `(order_id)`                  | Fetch items for an order detail view                                         |
+| `order_item_topping` | `(order_item_id)`             | Fetch toppings for an order item                                             |
+
+> Application-layer validation rules that go beyond what the DB schema enforces (conditional field requirements, display rules) are tracked in `.kiro/steering/database-decisions.md`.
