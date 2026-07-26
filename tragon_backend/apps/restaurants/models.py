@@ -28,6 +28,13 @@ class Restaurant(models.Model):
     """Restaurant profile."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.OneToOneField(
+        Owner,
+        on_delete=models.CASCADE,
+        related_name="restaurant",
+        null=True,
+        blank=True,
+    )
     slug = models.SlugField(max_length=50, unique=True, editable=False)
     name = models.CharField(max_length=200)
     logo_url = models.TextField(blank=True, default="")

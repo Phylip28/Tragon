@@ -38,7 +38,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: `python manage.py migrate` runs cleanly, all tables exist in postgres
   - _Requirements: R1, R2, R4_
 
-- [ ] 3. Authentication: JWT + roles
+- [x] 3. Authentication: JWT + roles
   - Configure Simple JWT in settings (access 30min, refresh 7d, rotate+blacklist)
   - Create `RegistrationSerializer` (owner_name, email, password, restaurant_name)
   - Create `POST /api/v1/auth/register/` — creates Owner + Restaurant atomically, returns JWT pair + restaurant data with slug

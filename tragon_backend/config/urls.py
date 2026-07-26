@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 api_v1_patterns = [
-    # App URL includes will be added as APIs are built
+    path("auth/", include("apps.restaurants.urls")),
 ]
 
 urlpatterns = [
