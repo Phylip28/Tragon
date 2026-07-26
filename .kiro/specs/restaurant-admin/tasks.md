@@ -6,7 +6,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
 
 ## Tasks
 
-- [ ] 1. Backend project setup
+- [x] 1. Backend project setup
   - Create `tragon_backend/` with `pyproject.toml` (Django 5.2.x, djangorestframework, djangorestframework-simplejwt, django-cors-headers, psycopg[binary], boto3, pillow)
   - Initialize with `uv`: `uv init`, `uv sync`
   - Create `config/settings/base.py`, `development.py`, `production.py`
