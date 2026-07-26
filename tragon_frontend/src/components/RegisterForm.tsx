@@ -27,14 +27,21 @@ export default function RegisterForm() {
 
       if (response.ok) {
         const data = await response.json();
-        setTokens(data.access, data.refresh);
+        setTokens(data.tokens.access, data.tokens.refresh);
         window.location.href = "/admin/settings";
       } else {
         const data = await response.json();
-        if (data.detail) {
+        if (data.message) {
+          setGeneralError(data.message);
+        } else if (data.detail) {
           setGeneralError(data.detail);
         } else {
-          setErrors(data);
+          // Field-level errors from DRF
+          const fieldErrors: Record<string, string[]> = {};
+          for (const [key, val] of Object.entries(data)) {
+            fieldErrors[key] = Array.isArray(val) ? val : [String(val)];
+          }
+          setErrors(fieldErrors);
         }
       }
     } catch {

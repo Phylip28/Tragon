@@ -26,8 +26,10 @@ export default function LoginForm() {
         const data = await response.json();
         if (data.detail) {
           setGeneralError(data.detail);
+        } else if (data.message) {
+          setGeneralError(data.message);
         } else {
-          setErrors(data);
+          setGeneralError("Credenciales inválidas. Verifica tu correo y contraseña.");
         }
       }
     } catch {
