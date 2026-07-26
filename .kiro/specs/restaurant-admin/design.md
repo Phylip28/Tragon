@@ -2,107 +2,139 @@
 
 ## Overview
 
-The restaurant-admin module provides the backend API and frontend management panel for restaurant owners to configure their restaurant, manage menus, and view order history. It enforces multi-tenant isolation so each restaurant's data is accessible only through its own authentication context.
+The restaurant-admin module covers the backend API and frontend panel for restaurant owners to configure their profile, manage their menu catalog (categories, products, toppings), organize products into custom sections with drag-and-drop ordering, upload images, and view order history. Protected by JWT + restaurant owner role.
 
 ## Architecture
 
-### System Layers
+This module lives within the monolith described in `ARCHITECTURE.md`. It touches:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Astro 7.x SSR + React Islands (Management Panel)          │
-│  - Restaurant config & settings                             │
-│  - Menu management (categories, products, toppings)         │
-│  - Order history dashboard                                  │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ HTTPS
-┌─────────────────────▼───────────────────────────────────────┐
-│  Django REST Framework API                                   │
-│  - apps/restaurants → profile, slug, config                 │
-│  - apps/catalog    → categories, products, toppings         │
-│  - apps/orders     → order list, status transitions         │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────┐
-│  PostgreSQL │ AWS S3 (images)                                │
-└─────────────────────────────────────────────────────────────┘
-```
+- **Backend**: `apps/restaurants/` (profile, payment methods) + `apps/catalog/` (categories, products, toppings, sections)
+- **Frontend**: `/admin/*` Astro pages with React islands for the management panel
+- **Storage**: S3 for logo and product images
+- **Database**: Tables `restaurant`, `payment_method`, `category`, `product`, `topping` (see `DATABASE.md`)
 
 ## Components and Interfaces
 
 ### API Endpoints
 
-All API endpoints are served under `/api/v1/`.
+All endpoints require JWT with `restaurant_owner` role unless noted otherwise.
 
-#### Restaurant Endpoints
+#### Restaurant Profile
 
-| Method | Path                                 | Description                |
-| ------ | ------------------------------------ | -------------------------- |
-| GET    | `/api/v1/restaurants/me/`            | Get own restaurant profile |
-| PATCH  | `/api/v1/restaurants/me/`            | Update restaurant profile  |
-| GET    | `/api/v1/restaurants/{slug}/public/` | Public restaurant data     |
+| Method | Path                      | Description                                                                |
+| ------ | ------------------------- | -------------------------------------------------------------------------- |
+| GET    | `/api/v1/restaurants/me/` | Get authenticated restaurant profile                                       |
+| PATCH  | `/api/v1/restaurants/me/` | Update profile (name, address, delivery_fee, logo_url). Slug is read-only. |
 
-The `slug` field is excluded from writable fields. Any attempt to include it in PATCH payload is silently ignored.
+#### Payment Methods
 
-#### Catalog Endpoints
+| Method | Path                                           | Description                             |
+| ------ | ---------------------------------------------- | --------------------------------------- |
+| GET    | `/api/v1/restaurants/me/payment-methods/`      | List payment methods for the restaurant |
+| POST   | `/api/v1/restaurants/me/payment-methods/`      | Add a payment method                    |
+| PATCH  | `/api/v1/restaurants/me/payment-methods/{id}/` | Update a payment method                 |
+| DELETE | `/api/v1/restaurants/me/payment-methods/{id}/` | Remove a payment method                 |
 
-| Method       | Path                                          | Description                |
-| ------------ | --------------------------------------------- | -------------------------- |
-| GET/POST     | `/api/v1/catalog/categories/`                 | List / Create categories   |
-| PATCH/DELETE | `/api/v1/catalog/categories/{id}/`            | Update / Delete category   |
-| GET/POST     | `/api/v1/catalog/products/`                   | List / Create products     |
-| PATCH/DELETE | `/api/v1/catalog/products/{id}/`              | Update / Delete product    |
-| POST         | `/api/v1/catalog/products/{id}/upload-photo/` | Upload product photo       |
-| GET/POST     | `/api/v1/catalog/toppings/`                   | List / Create toppings     |
-| PATCH/DELETE | `/api/v1/catalog/toppings/{id}/`              | Update / Delete topping    |
-| GET          | `/api/v1/catalog/{slug}/menu/`                | Public full menu (no auth) |
+#### Categories
 
-#### Order Endpoints
+| Method | Path                               | Description                                |
+| ------ | ---------------------------------- | ------------------------------------------ |
+| GET    | `/api/v1/catalog/categories/`      | List categories for the restaurant         |
+| POST   | `/api/v1/catalog/categories/`      | Create category                            |
+| PATCH  | `/api/v1/catalog/categories/{id}/` | Update category                            |
+| DELETE | `/api/v1/catalog/categories/{id}/` | Soft-delete category (set is_active=false) |
 
-| Method | Path                          | Description                                       |
-| ------ | ----------------------------- | ------------------------------------------------- |
-| GET    | `/api/v1/orders/`             | List orders (filters: status, date_from, date_to) |
-| GET    | `/api/v1/orders/{id}/`        | Get order detail                                  |
-| PATCH  | `/api/v1/orders/{id}/status/` | Change order status                               |
+#### Products
 
-### Multi-Tenant Isolation
+| Method | Path                                          | Description                             |
+| ------ | --------------------------------------------- | --------------------------------------- |
+| GET    | `/api/v1/catalog/products/`                   | List products (filterable by category)  |
+| POST   | `/api/v1/catalog/products/`                   | Create product                          |
+| PATCH  | `/api/v1/catalog/products/{id}/`              | Update product                          |
+| DELETE | `/api/v1/catalog/products/{id}/`              | Soft-delete product                     |
+| POST   | `/api/v1/catalog/products/{id}/upload-photo/` | Upload product photo to S3, returns URL |
 
-All catalog and order endpoints automatically filter by the restaurant associated with the authenticated owner. This is enforced at the queryset level via a shared mixin.
+#### Toppings
 
-### Order State Machine
+| Method | Path                                      | Description                 |
+| ------ | ----------------------------------------- | --------------------------- |
+| GET    | `/api/v1/catalog/products/{id}/toppings/` | List toppings for a product |
+| POST   | `/api/v1/catalog/products/{id}/toppings/` | Create topping              |
+| PATCH  | `/api/v1/catalog/toppings/{id}/`          | Update topping              |
+| DELETE | `/api/v1/catalog/toppings/{id}/`          | Soft-delete topping         |
 
-Valid transitions:
+#### Menu Sections and Ordering
 
-- `received` → `confirmed`, `cancelled`
-- `confirmed` → `in_preparation`, `cancelled`
-- `in_preparation` → `completed`, `cancelled`
-- `completed` → (terminal)
-- `cancelled` → (terminal)
+| Method | Path                                      | Description                                  |
+| ------ | ----------------------------------------- | -------------------------------------------- |
+| GET    | `/api/v1/catalog/sections/`               | List custom sections with their products     |
+| POST   | `/api/v1/catalog/sections/`               | Create section                               |
+| PATCH  | `/api/v1/catalog/sections/{id}/`          | Rename section                               |
+| DELETE | `/api/v1/catalog/sections/{id}/`          | Delete section                               |
+| PUT    | `/api/v1/catalog/sections/{id}/products/` | Set ordered list of product IDs in a section |
+| PUT    | `/api/v1/catalog/sections/order/`         | Set display order of sections                |
 
-Invalid transitions return HTTP 409.
+#### Order History
+
+| Method | Path                   | Description                                                               |
+| ------ | ---------------------- | ------------------------------------------------------------------------- |
+| GET    | `/api/v1/orders/`      | List orders for the restaurant. Filters: `status`, `date_from`, `date_to` |
+| GET    | `/api/v1/orders/{id}/` | Get order detail (items, toppings, notes)                                 |
+
+#### Image Upload
+
+| Method | Path                                  | Description                               |
+| ------ | ------------------------------------- | ----------------------------------------- |
+| POST   | `/api/v1/restaurants/me/upload-logo/` | Upload restaurant logo to S3, returns URL |
+
+### Public Endpoint (no auth)
+
+| Method | Path                           | Description                                                                          |
+| ------ | ------------------------------ | ------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/catalog/{slug}/menu/` | Full menu for a restaurant (categories → products → toppings, organized by sections) |
 
 ## Data Models
 
-Refer to `DATABASE.md` at the project root for the canonical normalized schema. This design document references those tables for context but `DATABASE.md` is the source of truth.
+This module uses the following tables from `DATABASE.md`:
 
-Key models used by this module:
+| Table                | Role in this module                                                      |
+| -------------------- | ------------------------------------------------------------------------ |
+| `restaurant`         | Profile data (name, slug, address, logo, delivery fee, telegram chat ID) |
+| `payment_method`     | Payment methods the restaurant accepts (cash, transfer, etc.)            |
+| `category`           | Menu categories scoped to the restaurant                                 |
+| `product`            | Menu items with name, description, photo, price                          |
+| `topping`            | Optional add-ons per product                                             |
+| `order`              | Read-only in this module — used for order history display                |
+| `order_item`         | Read-only — line items shown in order detail                             |
+| `order_item_topping` | Read-only — toppings per item shown in order detail                      |
 
-- `restaurant` — profile, slug, delivery fee, telegram chat ID
-- `payment_method` — per-restaurant payment method catalog
-- `category` — menu categories scoped to a restaurant
-- `product` — menu items with price, photo, description
-- `topping` — optional add-ons per product
-- `order` — customer orders with status, delivery info, payment reference
-- `order_item` — line items referencing products with price at order time
-- `order_item_topping` — toppings per order item with price at order time
+### New table needed: `menu_section`
+
+| Field         | Type            | Description                               |
+| ------------- | --------------- | ----------------------------------------- |
+| id            | UUID PK         |                                           |
+| restaurant_id | FK → restaurant |                                           |
+| name          | VARCHAR(200)    | Section display name (e.g. "Más pedidos") |
+| display_order | INTEGER         | Position of this section in the menu      |
+
+### New table needed: `menu_section_product`
+
+| Field         | Type              | Description                                 |
+| ------------- | ----------------- | ------------------------------------------- |
+| id            | UUID PK           |                                             |
+| section_id    | FK → menu_section |                                             |
+| product_id    | FK → product      |                                             |
+| display_order | INTEGER           | Position of this product within the section |
+
+> These two tables must be added to `DATABASE.md` once approved.
 
 ## Error Handling
 
-All API errors follow a consistent JSON format:
-
-| Code                 | HTTP Status | Description                                              |
-| -------------------- | ----------- | -------------------------------------------------------- |
-| `validation_error`   | 400         | Request body validation failed                           |
-| `not_found`          | 404         | Resource does not exist or belongs to another restaurant |
-| `invalid_transition` | 409         | Order status transition not allowed                      |
-| `upload_failed`      | 500         | S3 upload failed                                         |
+| Scenario                                            | HTTP Code | Error Code             |
+| --------------------------------------------------- | --------- | ---------------------- |
+| Validation error (missing/invalid fields)           | 400       | `validation_error`     |
+| JWT missing or invalid                              | 401       | `authentication_error` |
+| User doesn't own this restaurant                    | 403       | `permission_denied`    |
+| Resource not found or belongs to another restaurant | 404       | `not_found`            |
+| Duplicate payment method type for same restaurant   | 409       | `duplicate_entry`      |
+| S3 upload failure                                   | 500       | `upload_failed`        |
