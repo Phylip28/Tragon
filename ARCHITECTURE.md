@@ -10,6 +10,7 @@
 - **Primary user workflows**: Client browses menu and places order → Restaurant manages menu and tracks orders → Chef visualizes active orders in real time → Driver navigates delivery route
 - **Runtime surfaces**: Astro 7.x SSR (frontend) + Django 5.2.x REST (backend)
 - **Architecture style**: Monolith, modularized by Django app
+- **Authentication**: JWT + roles (restaurant owner, operator). Clients do not authenticate.
 - **Source of truth for requirements**: `.kiro/specs/`
 
 ## Domain Map
@@ -23,16 +24,7 @@
 
 ## Module Dependencies
 
-```
-restaurant-admin (foundational — must exist first)
-       │
-       ▼
-client-ordering (requires restaurant with products)
-       │
-       ├──────────────▶ kitchen-panel (requires orders to exist)
-       │
-       └──────────────▶ delivery-routing (requires delivery orders)
-```
+`restaurant-admin` is foundational and must exist first. `client-ordering` depends on a restaurant with products being configured. Both `kitchen-panel` and `delivery-routing` depend on orders existing via `client-ordering`.
 
 ## Layer Model
 
@@ -63,40 +55,31 @@ Fixed directional model — agents must not invent ad hoc architecture:
 - Models are data definitions — no business logic beyond field constraints.
 - Cross-cutting concerns (S3 uploads, notifications, WebSocket events) are injected via explicit service calls, not middleware magic.
 
-## Data
+## Cross-Cutting Concerns
 
-- **Schema source of truth**: `DATABASE.md` at the project root.
-- **Monetary fields**: `INTEGER` (Colombian Pesos, no subunits).
-- **IDs**: UUID for all primary keys.
-- **Timestamps**: `TIMESTAMPTZ` (includes date + time + timezone).
-- **Soft delete**: `is_active` boolean on catalog entities (category, product, topping). Orders are never deleted.
+| Concern         | Approach                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| Auth            | JWT + roles via Simple JWT | Restaurant owners and operators authenticate; clients do not   |
+| CORS            | `django-cors-headers`      | Allow frontend origin only                                     |
+| Error responses | Consistent JSON format     | `{ "error": "code", "message": "...", "details": {} }`         |
+| Image uploads   | Direct to S3 via `boto3`   | Returns public URL, stored on `photo_url` / `logo_url` fields  |
+| Notifications   | Telegram Bot API           | Restaurant receives order notifications via `telegram_chat_id` |
+| Logging         | Python `logging` module    | Structured, no print statements                                |
+| Migrations      | Django ORM migrations      | All schema changes through versioned migration files           |
 
 ## Infrastructure
 
-| Layer             | Choice                              | Notes                                                              |
-| ----------------- | ----------------------------------- | ------------------------------------------------------------------ |
-| Local dev         | Docker + docker-compose             | PostgreSQL, Redis, backend, frontend                               |
-| Database          | PostgreSQL on AWS RDS               | Single instance, no read replicas for MVP                          |
-| Storage           | AWS S3                              | Restaurant logos and product photos                                |
-| Real-time         | Django Channels + Redis             | WebSocket for kitchen-panel only                                   |
-| Deployment target | AWS Lambda + EventBridge **or** ECS | Final decision pending; both options viable for a modular monolith |
-| Containers        | Docker                              | Backend and frontend each have their own Dockerfile                |
-
-## Cross-Cutting Concerns
-
-| Concern         | Approach                 | Notes                                                          |
-| --------------- | ------------------------ | -------------------------------------------------------------- |
-| CORS            | `django-cors-headers`    | Allow frontend origin only                                     |
-| Error responses | Consistent JSON format   | `{ "error": "code", "message": "...", "details": {} }`         |
-| Image uploads   | Direct to S3 via `boto3` | Returns public URL, stored on `photo_url` / `logo_url` fields  |
-| Notifications   | Telegram Bot API         | Restaurant receives order notifications via `telegram_chat_id` |
-| Logging         | Python `logging` module  | Structured, no print statements                                |
-| Migrations      | Django ORM migrations    | All schema changes through versioned migration files           |
+| Layer             | Choice                              | Notes                                               |
+| ----------------- | ----------------------------------- | --------------------------------------------------- |
+| Local dev         | Docker + docker-compose             | PostgreSQL, Redis, backend, frontend                |
+| Database          | PostgreSQL on AWS RDS               | Single instance, no read replicas for MVP           |
+| Storage           | AWS S3                              | Restaurant logos and product photos                 |
+| Real-time         | Django Channels + Redis             | WebSocket for kitchen-panel only                    |
+| Deployment target | AWS Lambda + EventBridge **or** ECS | Final decision pending                              |
+| Containers        | Docker                              | Backend and frontend each have their own Dockerfile |
 
 ## What We Are NOT Doing
 
-- **Tests**: No automated test suite. Time constraint — not a quality choice.
-- **CI/CD**: No pipeline for MVP. Manual deploys.
-- **Auth for clients**: Clients place orders without logging in.
+- **Tests**: No automated test suite. Time constraint.
+- **Client authentication**: Clients place orders without logging in.
 - **WhatsApp integration**: Only Telegram for notifications in MVP.
-- **CDN**: S3 direct URLs for images, no CloudFront layer.
