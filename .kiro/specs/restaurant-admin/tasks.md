@@ -150,7 +150,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: filters work; detail shows complete order breakdown
   - _Requirements: R4.1, R4.2, R4.3_
 
-- [ ] 16. Docker + compose final
+- [x] 16. Docker + compose final
   - Add frontend service to `docker-compose.yml`
   - Ensure `docker-compose up` boots backend + frontend + postgres
   - Create `init.sh`: starts compose, runs migrations, verifies health
