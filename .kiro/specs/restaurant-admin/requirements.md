@@ -53,13 +53,13 @@ The restaurant-admin module provides restaurant owners with tools to configure t
 2. THE order history SHALL show: reference number, date and hour, items summary, total, delivery type, and state.
 3. THE management panel SHALL allow filtering order history by date range and state.
 
-### Requirement 5: Menu Ordering and Sections
+### Requirement 5: Product Highlight Labels
 
-**User Story:** As a restaurant owner, I want to reorder my products by dragging them and group them into custom sections (e.g. "Más pedidos", "Para chuparse los dedos", "Solo pollo"), so that I can highlight my best items and organize my menu the way I want.
+**User Story:** As a restaurant owner, I want to assign a highlight label to a specific product (e.g. "Más vendido", "Nuevo"), so that I can draw attention to it in the menu without duplicating it.
 
 #### Acceptance Criteria
 
-1. THE management panel SHALL allow the owner to reorder products by dragging them into a new position.
-2. THE management panel SHALL allow the owner to create, rename, and delete custom menu sections.
-3. THE management panel SHALL allow the owner to assign products to one or more sections.
-4. WHEN the owner reorders products or sections, THE frontend SHALL persist the new order and reflect it in the client-facing menu.
+1. THE management panel SHALL allow the owner to set an optional highlight label on a product.
+2. THE management panel SHALL allow the owner to remove a product's highlight label.
+3. THE frontend SHALL display the highlight label on the product card in the client-facing menu when set.
+4. A product SHALL appear only once in its category regardless of whether it has a highlight label.

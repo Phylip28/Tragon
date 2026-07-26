@@ -63,16 +63,11 @@ All endpoints require JWT with `restaurant_owner` role unless noted otherwise.
 | PATCH  | `/api/v1/catalog/toppings/{id}/`          | Update topping              |
 | DELETE | `/api/v1/catalog/toppings/{id}/`          | Soft-delete topping         |
 
-#### Menu Sections and Ordering
+#### Product Highlight Label
 
-| Method | Path                                      | Description                                  |
-| ------ | ----------------------------------------- | -------------------------------------------- |
-| GET    | `/api/v1/catalog/sections/`               | List custom sections with their products     |
-| POST   | `/api/v1/catalog/sections/`               | Create section                               |
-| PATCH  | `/api/v1/catalog/sections/{id}/`          | Rename section                               |
-| DELETE | `/api/v1/catalog/sections/{id}/`          | Delete section                               |
-| PUT    | `/api/v1/catalog/sections/{id}/products/` | Set ordered list of product IDs in a section |
-| PUT    | `/api/v1/catalog/sections/order/`         | Set display order of sections                |
+| Method | Path                                   | Description                                |
+| ------ | -------------------------------------- | ------------------------------------------ |
+| PATCH  | `/api/v1/catalog/products/{id}/label/` | Set or clear the product's highlight label |
 
 #### Order History
 
@@ -91,42 +86,24 @@ All endpoints require JWT with `restaurant_owner` role unless noted otherwise.
 
 | Method | Path                           | Description                                                                          |
 | ------ | ------------------------------ | ------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/catalog/{slug}/menu/` | Full menu for a restaurant (categories → products → toppings, organized by sections) |
+| GET    | `/api/v1/catalog/{slug}/menu/` | Full menu for a restaurant (categories → products → toppings, with highlight labels) |
 
 ## Data Models
 
 This module uses the following tables from `DATABASE.md`:
 
-| Table                | Role in this module                                                      |
-| -------------------- | ------------------------------------------------------------------------ |
-| `restaurant`         | Profile data (name, slug, address, logo, delivery fee, telegram chat ID) |
-| `payment_method`     | Payment methods the restaurant accepts (cash, transfer, etc.)            |
-| `category`           | Menu categories scoped to the restaurant                                 |
-| `product`            | Menu items with name, description, photo, price                          |
-| `topping`            | Optional add-ons per product                                             |
-| `order`              | Read-only in this module — used for order history display                |
-| `order_item`         | Read-only — line items shown in order detail                             |
-| `order_item_topping` | Read-only — toppings per item shown in order detail                      |
+| Table                | Role in this module                                                       |
+| -------------------- | ------------------------------------------------------------------------- |
+| `restaurant`         | Profile data (name, slug, address, logo, delivery fee, telegram chat ID)  |
+| `payment_method`     | Payment methods the restaurant accepts (cash, transfer, etc.)             |
+| `category`           | Menu categories scoped to the restaurant                                  |
+| `product`            | Menu items with name, description, photo, price, optional highlight label |
+| `topping`            | Optional add-ons per product                                              |
+| `order`              | Read-only in this module — used for order history display                 |
+| `order_item`         | Read-only — line items shown in order detail                              |
+| `order_item_topping` | Read-only — toppings per item shown in order detail                       |
 
-### New table needed: `menu_section`
-
-| Field         | Type            | Description                               |
-| ------------- | --------------- | ----------------------------------------- |
-| id            | UUID PK         |                                           |
-| restaurant_id | FK → restaurant |                                           |
-| name          | VARCHAR(200)    | Section display name (e.g. "Más pedidos") |
-| display_order | INTEGER         | Position of this section in the menu      |
-
-### New table needed: `menu_section_product`
-
-| Field         | Type              | Description                                 |
-| ------------- | ----------------- | ------------------------------------------- |
-| id            | UUID PK           |                                             |
-| section_id    | FK → menu_section |                                             |
-| product_id    | FK → product      |                                             |
-| display_order | INTEGER           | Position of this product within the section |
-
-> These two tables must be added to `DATABASE.md` once approved.
+Highlight labels are stored directly on `product.label` (nullable string). No additional tables required.
 
 ## Error Handling
 
