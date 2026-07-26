@@ -15,6 +15,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!tragon_frontend/src/lib/
 lib64/
 parts/
 sdist/

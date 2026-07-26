@@ -74,14 +74,14 @@ export default function MenuManager() {
       const res = await apiPatch(`/catalog/categories/${editingCategory.id}/`, { name: categoryName });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail ?? data.name?.[0] ?? "Error al actualizar categoría.");
+        setError(data.details?.name?.[0] ?? data.message ?? data.detail ?? "Error al actualizar categoría.");
         return;
       }
     } else {
       const res = await apiPost("/catalog/categories/", { name: categoryName });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail ?? data.name?.[0] ?? "Error al crear categoría.");
+        setError(data.details?.name?.[0] ?? data.message ?? data.detail ?? "Error al crear categoría.");
         return;
       }
     }
@@ -255,7 +255,7 @@ export default function MenuManager() {
 
       {/* Error toast */}
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg text-sm max-w-sm">
+        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg text-sm max-w-sm z-50">
           <div className="flex items-center justify-between">
             <span>{error}</span>
             <button onClick={() => setError("")} className="ml-2 text-red-500 hover:text-red-700">✕</button>
@@ -341,7 +341,21 @@ function ProductForm({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail ?? Object.values(data).flat().join(", ") ?? "Error al guardar producto.");
+        // Extract field-level errors from our custom error format
+        if (data.details && typeof data.details === "object" && Object.keys(data.details).length > 0) {
+          const messages: string[] = [];
+          for (const [field, msgs] of Object.entries(data.details)) {
+            const fieldMsgs = Array.isArray(msgs) ? msgs : [String(msgs)];
+            messages.push(`${field}: ${fieldMsgs.join(", ")}`);
+          }
+          setError(messages.join(" | "));
+        } else if (data.message) {
+          setError(data.message);
+        } else if (data.detail) {
+          setError(data.detail);
+        } else {
+          setError("Error al guardar producto.");
+        }
         return;
       }
 
@@ -629,7 +643,20 @@ function ToppingForm({
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail ?? Object.values(data).flat().join(", ") ?? "Error.");
+        if (data.details && typeof data.details === "object" && Object.keys(data.details).length > 0) {
+          const messages: string[] = [];
+          for (const [field, msgs] of Object.entries(data.details)) {
+            const fieldMsgs = Array.isArray(msgs) ? msgs : [String(msgs)];
+            messages.push(`${field}: ${fieldMsgs.join(", ")}`);
+          }
+          setError(messages.join(" | "));
+        } else if (data.message) {
+          setError(data.message);
+        } else if (data.detail) {
+          setError(data.detail);
+        } else {
+          setError("Error al guardar.");
+        }
         return;
       }
 

@@ -5,13 +5,11 @@ import { setTokens } from "@/stores/auth";
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setErrors({});
     setGeneralError("");
     setLoading(true);
 
@@ -41,6 +39,10 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {generalError && (
+        <p className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{generalError}</p>
+      )}
+
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
           Correo electrónico
@@ -54,9 +56,6 @@ export default function LoginForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.join(", ")}</p>
-        )}
       </div>
 
       <div>
@@ -72,14 +71,7 @@ export default function LoginForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.join(", ")}</p>
-        )}
       </div>
-
-      {generalError && (
-        <p className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{generalError}</p>
-      )}
 
       <button
         type="submit"

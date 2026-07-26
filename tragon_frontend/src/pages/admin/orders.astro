@@ -1,10 +1,12 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import AdminNav from "@/components/AdminNav.astro";
 import OrderList from "@/components/OrderList";
 ---
 
 <BaseLayout title="Historial de pedidos">
   <div class="min-h-screen bg-gray-50">
+    <AdminNav />
     <div class="max-w-6xl mx-auto py-8 px-4">
       <h1 class="text-2xl font-bold text-gray-900 mb-6">Historial de pedidos</h1>
       <OrderList client:load />

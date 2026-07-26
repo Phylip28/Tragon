@@ -1,0 +1,27 @@
+---
+const currentPath = Astro.url.pathname;
+
+const links = [
+  { href: "/admin/menu", label: "Menú" },
+  { href: "/admin/settings", label: "Configuración" },
+  { href: "/admin/orders", label: "Pedidos" },
+];
+---
+
+<header class="bg-white border-b border-gray-200 px-6 py-4">
+  <div class="flex items-center justify-between max-w-7xl mx-auto">
+    <a href="/admin/menu" class="text-xl font-bold text-gray-900">Tragón</a>
+    <nav class="flex gap-4 text-sm">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          class={currentPath.startsWith(link.href)
+            ? "text-orange-600 font-medium"
+            : "text-gray-600 hover:text-gray-900"}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>

@@ -55,6 +55,17 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {generalError && (
+        <p className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{generalError}</p>
+      )}
+      {Object.keys(errors).length > 0 && (
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md space-y-1">
+          {Object.entries(errors).map(([field, msgs]) => (
+            <p key={field}>{msgs.join(", ")}</p>
+          ))}
+        </div>
+      )}
+
       <div>
         <label htmlFor="owner_name" className="block text-sm font-medium text-gray-700 mb-1">
           Nombre del propietario
@@ -68,9 +79,6 @@ export default function RegisterForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
-        {errors.owner_name && (
-          <p className="mt-1 text-sm text-red-600">{errors.owner_name.join(", ")}</p>
-        )}
       </div>
 
       <div>
@@ -86,9 +94,6 @@ export default function RegisterForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.join(", ")}</p>
-        )}
       </div>
 
       <div>
@@ -104,9 +109,6 @@ export default function RegisterForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.join(", ")}</p>
-        )}
       </div>
 
       <div>
@@ -122,14 +124,7 @@ export default function RegisterForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
-        {errors.restaurant_name && (
-          <p className="mt-1 text-sm text-red-600">{errors.restaurant_name.join(", ")}</p>
-        )}
       </div>
-
-      {generalError && (
-        <p className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{generalError}</p>
-      )}
 
       <button
         type="submit"
