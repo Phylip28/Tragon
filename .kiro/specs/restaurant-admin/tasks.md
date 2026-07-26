@@ -49,7 +49,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: register → login → access protected endpoint → refresh → re-access
   - _Requirements: R1.3_
 
-- [ ] 4. Restaurant profile API
+- [x] 4. Restaurant profile API
   - Create `RestaurantSerializer` (slug read-only, exclude from writable fields)
   - `GET /api/v1/restaurants/me/` — returns authenticated owner's restaurant
   - `PATCH /api/v1/restaurants/me/` — update name, address_line, delivery_fee, lat/lng. Slug change silently ignored.
@@ -57,7 +57,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: PATCH with slug field → slug unchanged; upload logo → URL returned and stored
   - _Requirements: R1.1, R1.2, R3.1_
 
-- [ ] 5. Payment methods API
+- [x] 5. Payment methods API
   - Create `PaymentMethodSerializer` with validation: `key_value` required if `type = 'transfer_with_key'`
   - `GET /api/v1/restaurants/me/payment-methods/` — list for the restaurant
   - `POST /api/v1/restaurants/me/payment-methods/` — add payment method
@@ -66,7 +66,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: cannot create duplicate `(restaurant_id, type)`; `transfer_with_key` without `key_value` returns 400
   - _Requirements: R1.2_
 
-- [ ] 6. Categories API
+- [x] 6. Categories API
   - Create `CategorySerializer`
   - `GET /api/v1/catalog/categories/` — list (filtered by restaurant via mixin)
   - `POST /api/v1/catalog/categories/` — create
@@ -75,7 +75,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: duplicate name within same restaurant → 400; different restaurants can share names
   - _Requirements: R2.1_
 
-- [ ] 7. Products API + photo upload + highlight label
+- [x] 7. Products API + photo upload + highlight label
   - Create `ProductSerializer`
   - `GET /api/v1/catalog/products/` — list (filterable by `category_id`)
   - `POST /api/v1/catalog/products/` — create
@@ -86,7 +86,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: upload photo → URL returned; set label → product has label; clear label → label is null
   - _Requirements: R2.2, R3.2, R5.1, R5.2_
 
-- [ ] 8. Toppings API
+- [x] 8. Toppings API
   - Create `ToppingSerializer`
   - `GET /api/v1/catalog/products/{id}/toppings/` — list toppings for a product
   - `POST /api/v1/catalog/products/{id}/toppings/` — create
@@ -119,7 +119,7 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - Verify: `pnpm build` succeeds
   - _Requirements: —_
 
-- [ ] 12. Frontend: login and registration pages
+- [x] 12. Frontend: login and registration pages
   - `src/pages/admin/login.astro` + `LoginForm.tsx` React island
   - `src/pages/admin/register.astro` + `RegisterForm.tsx` React island
   - On success: store JWT, redirect to dashboard

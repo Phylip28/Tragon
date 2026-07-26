@@ -1,0 +1,18 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import LoginForm from "@/components/LoginForm";
+---
+
+<BaseLayout title="Iniciar sesión">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Tragón</h1>
+        <p class="mt-2 text-gray-600">Inicia sesión en tu panel de administración</p>
+      </div>
+      <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+        <LoginForm client:load />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
