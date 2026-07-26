@@ -19,19 +19,19 @@ Build the restaurant-admin module from scratch: Django backend (models, auth, AP
   - _Requirements: —_
 
 - [ ] 2. Database models and migrations
-  - [ ] 2.1 Implement `Owner` model in `apps/restaurants/models.py`
+  - [x] 2.1 Implement `Owner` model in `apps/restaurants/models.py`
     - Extend `AbstractUser`, email as `USERNAME_FIELD`, timestamps
-  - [ ] 2.2 Implement `Restaurant` model
+  - [x] 2.2 Implement `Restaurant` model
     - Fields per `DATABASE.md`: slug (auto-generated, immutable), name, logo_url, address_line, lat/lng, telegram_chat_id, delivery_fee, is_active, created_at
-  - [ ] 2.3 Implement `PaymentMethod` model
+  - [x] 2.3 Implement `PaymentMethod` model
     - FK to restaurant, type with CHECK, key_value conditional, is_active, UNIQUE(restaurant_id, type)
-  - [ ] 2.4 Implement `Category` model in `apps/catalog/models.py`
+  - [x] 2.4 Implement `Category` model in `apps/catalog/models.py`
     - FK to restaurant (NOT NULL, ON DELETE RESTRICT), name, is_active, UNIQUE(restaurant_id, name)
-  - [ ] 2.5 Implement `Product` model
+  - [x] 2.5 Implement `Product` model
     - FK to category (nullable, ON DELETE SET NULL), name, description, photo_url, base_price, is_active, label
-  - [ ] 2.6 Implement `Topping` model
+  - [x] 2.6 Implement `Topping` model
     - FK to product (NOT NULL, ON DELETE CASCADE), name, extra_price, is_active
-  - [ ] 2.7 Implement `Order`, `OrderItem`, `OrderItemTopping` models in `apps/orders/models.py`
+  - [x] 2.7 Implement `Order`, `OrderItem`, `OrderItemTopping` models in `apps/orders/models.py`
     - All fields and constraints per `DATABASE.md`, including CHECK constraints on status and delivery_type
     - These are read-only in this module (used for order history)
   - [ ] 2.8 Generate and run all migrations
