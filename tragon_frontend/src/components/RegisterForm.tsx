@@ -31,17 +31,19 @@ export default function RegisterForm() {
         window.location.href = "/admin/settings";
       } else {
         const data = await response.json();
-        if (data.message) {
+        // Extract field-level errors from details (custom exception handler format)
+        if (data.details && typeof data.details === "object" && Object.keys(data.details).length > 0) {
+          const fieldErrors: Record<string, string[]> = {};
+          for (const [key, val] of Object.entries(data.details)) {
+            fieldErrors[key] = Array.isArray(val) ? val : [String(val)];
+          }
+          setErrors(fieldErrors);
+        } else if (data.message) {
           setGeneralError(data.message);
         } else if (data.detail) {
           setGeneralError(data.detail);
         } else {
-          // Field-level errors from DRF
-          const fieldErrors: Record<string, string[]> = {};
-          for (const [key, val] of Object.entries(data)) {
-            fieldErrors[key] = Array.isArray(val) ? val : [String(val)];
-          }
-          setErrors(fieldErrors);
+          setGeneralError("Ocurrió un error inesperado.");
         }
       }
     } catch {
